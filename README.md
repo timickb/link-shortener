@@ -1,5 +1,10 @@
 # Link shortener
 
+### Pull Docker image
+`docker pull timickb/linkshortener`
+
+The image is rebuilt and pushed on each `master` commit
+
 ### Run
 `docker-compose up`
 
