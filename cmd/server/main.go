@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"github.com/sirupsen/logrus"
 	"github.com/timickb/link-shortener/internal/config"
 	"github.com/timickb/link-shortener/internal/factory"
@@ -9,7 +10,17 @@ import (
 	"strconv"
 )
 
+var (
+	storageType string
+)
+
+func init() {
+	flag.StringVar(&storageType, "storage", "postgres", "Must be postgres or memory")
+}
+
 func main() {
+	flag.Parse()
+
 	logger := logrus.New()
 	formatter := &logrus.TextFormatter{
 		FullTimestamp:   true,
@@ -29,12 +40,12 @@ func mainNoExit(logger *logrus.Logger) error {
 	errChan := make(chan error)
 	ctx := context.Background()
 
-	httpServer, err := factory.InitializeHTTPServerPostgres(logger, cfg)
+	httpServer, err := factory.InitializeHTTPServer(logger, cfg, storageType)
 	if err != nil {
 		return err
 	}
 
-	rpcServer, err := factory.InitializeRPCServer(ctx, logger, cfg)
+	rpcServer, err := factory.InitializeRPCServer(ctx, logger, cfg, storageType)
 	if err != nil {
 		return err
 	}
@@ -56,7 +67,7 @@ func mainNoExit(logger *logrus.Logger) error {
 		case err := <-errChan:
 			return err
 		case <-ctx.Done():
-			return nil
+			return ctx.Err()
 		}
 	}
 }

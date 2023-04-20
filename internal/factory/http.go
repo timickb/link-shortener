@@ -2,6 +2,7 @@ package factory
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/timickb/link-shortener/internal/config"
@@ -12,36 +13,40 @@ import (
 	"github.com/timickb/link-shortener/internal/usecase/shortener"
 )
 
-func InitializeHTTPServerPostgres(log interfaces.Logger, cfg *config.AppConfig) (*v1.Server, error) {
-	connStr := fmt.Sprintf(
-		"host=%s user=%s dbname=%s sslmode=%s port=%d password=%s",
-		cfg.Postgres.Host,
-		cfg.Postgres.User,
-		cfg.Postgres.Name,
-		cfg.Postgres.SSLMode,
-		cfg.Postgres.Port,
-		cfg.Postgres.Password)
+func InitializeHTTPServer(log interfaces.Logger, cfg *config.AppConfig, storage string) (*v1.Server, error) {
+	if storage == "postgres" {
+		connStr := fmt.Sprintf(
+			"host=%s user=%s dbname=%s sslmode=%s port=%d password=%s",
+			cfg.Postgres.Host,
+			cfg.Postgres.User,
+			cfg.Postgres.Name,
+			cfg.Postgres.SSLMode,
+			cfg.Postgres.Port,
+			cfg.Postgres.Password)
 
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		return nil, err
+		db, err := sql.Open("postgres", connStr)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := db.Ping(); err != nil {
+			return nil, err
+		}
+
+		repo := postgres.New(db)
+		service := shortener.New(log, repo)
+		server := v1.New(log, cfg, service)
+
+		return server, nil
 	}
 
-	if err := db.Ping(); err != nil {
-		return nil, err
+	if storage == "memory" {
+		repo := memory.New()
+		service := shortener.New(log, repo)
+		server := v1.New(log, cfg, service)
+
+		return server, nil
 	}
 
-	repo := postgres.New(db)
-	service := shortener.New(log, repo)
-	server := v1.New(log, cfg, service)
-
-	return server, nil
-}
-
-func InitializeHTTPServerMemStore(log interfaces.Logger, cfg *config.AppConfig) (*v1.Server, error) {
-	repo := memory.New()
-	service := shortener.New(log, repo)
-	server := v1.New(log, cfg, service)
-
-	return server, nil
+	return nil, errors.New("err invalid storage type")
 }

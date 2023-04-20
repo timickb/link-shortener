@@ -1,5 +1,10 @@
 # Link shortener
 
+### Storage type flag
+`app --storage=postgres` - uses PostgreSQL as a storage
+
+`app --storage=memory` - uses in-memory storage
+
 ### Pull Docker image
 `docker pull timickb/linkshortener`
 

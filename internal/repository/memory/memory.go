@@ -5,13 +5,22 @@ import (
 	"sync"
 )
 
+// There must be only one instance of repo for all API
+var (
+	singleton Repository
+	once      sync.Once
+)
+
 type Repository struct {
 	sync.Mutex
 	data map[string]string
 }
 
 func New() *Repository {
-	return &Repository{data: map[string]string{}}
+	once.Do(func() {
+		singleton = Repository{data: map[string]string{}}
+	})
+	return &singleton
 }
 
 func (r *Repository) CreateShortening(shortened, original string) error {
