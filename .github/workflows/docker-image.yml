@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag timickb/linkshortener:$(date +%s)
+      run: docker build . --file Dockerfile --tag timickb/linkshortener
       
     - name: Log out from Docker hub
       run: docker logout
