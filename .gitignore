@@ -1,0 +1,4 @@
+.idea/
+.postgres_data/
+bin/
+*.out

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/timickb/link-shortener/internal/delivery/grpc/v1/generated";
+
+message CreateShorteningRequest {
+  string url = 1;
+}
+
+message CreateShorteningResponse {
+  string short = 1;
+}
+
+message RestoreRequest {
+  string short = 1;
+}
+
+message RestoreResponse {
+  string original = 1;
+}
+
+service ShortenerService {
+  rpc CreateLink(CreateShorteningRequest) returns (CreateShorteningResponse);
+  rpc RestoreLink(RestoreRequest) returns (RestoreResponse);
+}
