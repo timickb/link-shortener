@@ -1,8 +1,12 @@
 package memory
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
 
 type Repository struct {
+	sync.Mutex
 	data map[string]string
 }
 
@@ -11,6 +15,8 @@ func New() *Repository {
 }
 
 func (r *Repository) CreateShortening(shortened, original string) error {
+	r.Lock()
+	defer r.Unlock()
 	if _, ok := r.data[shortened]; ok {
 		return nil
 	}
@@ -19,6 +25,9 @@ func (r *Repository) CreateShortening(shortened, original string) error {
 }
 
 func (r *Repository) GetOriginal(shortened string) (string, error) {
+	r.Lock()
+	defer r.Unlock()
+
 	original, ok := r.data[shortened]
 	if !ok {
 		return "", errors.New("err not found")
