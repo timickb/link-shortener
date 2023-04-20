@@ -15,5 +15,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag linkshortener:$(date +%s)
-  
+      run: docker build . --file Dockerfile --tag timickb/linkshortener:$(date +%s)
+      
+    - name: Log out from Docker hub
+      run: docker logout
+      
+    - name: Log in to Docker Hub
+      run: docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }}
+      
+    - name: Push the Docker image
+      run: docker push timickb/linkshortener
