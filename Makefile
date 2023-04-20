@@ -1,10 +1,6 @@
-.PHONY: build-http
-build-http:
-	go build -v  -o "./bin/http_server" ./cmd/http
-
-.PHONY: build-grpc
-build-grpc:
-	go build -v  -o "./bin/grpc_server" ./cmd/grpc
+.PHONY: build
+build:
+	go build -v  -o "./bin/server" ./cmd/server
 
 .PHONY: test
 test:
@@ -18,4 +14,4 @@ test-report:
 	go tool cover -html=coverage_repo.out
 	rm *.out
 
-.DEFAULT_GOAL := build-http
+.DEFAULT_GOAL := build
