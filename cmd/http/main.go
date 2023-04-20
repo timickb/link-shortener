@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/sirupsen/logrus"
 	"github.com/timickb/link-shortener/internal/config"
 	"github.com/timickb/link-shortener/internal/factory"
@@ -25,16 +26,39 @@ func mainNoExit(logger *logrus.Logger) error {
 	cfg := config.NewDefault()
 	fillConfigFromEnv(cfg)
 
-	server, err := factory.InitializeHTTPServerPostgres(logger, cfg)
+	errChan := make(chan error)
+	ctx := context.Background()
+
+	httpServer, err := factory.InitializeHTTPServerPostgres(logger, cfg)
 	if err != nil {
 		return err
 	}
 
-	if err := server.Run(); err != nil {
+	rpcServer, err := factory.InitializeRPCServer(ctx, logger, cfg)
+	if err != nil {
 		return err
 	}
 
-	return nil
+	go func(errChan chan<- error) {
+		if err := httpServer.Run(); err != nil {
+			errChan <- err
+		}
+	}(errChan)
+
+	go func(errChan chan<- error) {
+		if err := rpcServer.Run(); err != nil {
+			errChan <- err
+		}
+	}(errChan)
+
+	for {
+		select {
+		case err := <-errChan:
+			return err
+		case <-ctx.Done():
+			return nil
+		}
+	}
 }
 
 func fillConfigFromEnv(cfg *config.AppConfig) {
@@ -56,7 +80,10 @@ func fillConfigFromEnv(cfg *config.AppConfig) {
 	if os.Getenv("DB_PORT") != "" {
 		cfg.Postgres.Port, _ = strconv.Atoi(os.Getenv("DB_PORT"))
 	}
-	if os.Getenv("APP_PORT") != "" {
-		cfg.AppPort, _ = strconv.Atoi(os.Getenv("APP_PORT"))
+	if os.Getenv("HTTP_PORT") != "" {
+		cfg.HTTPPort, _ = strconv.Atoi(os.Getenv("HTTP_PORT"))
+	}
+	if os.Getenv("RPC_PORT") != "" {
+		cfg.RPCPort, _ = strconv.Atoi(os.Getenv("RPC_PORT"))
 	}
 }

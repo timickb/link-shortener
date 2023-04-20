@@ -10,20 +10,22 @@ type postgres struct {
 }
 
 type AppConfig struct {
-	AppPort  int
+	HTTPPort int
+	RPCPort  int
 	Postgres postgres
 }
 
 func NewDefault() *AppConfig {
 	return &AppConfig{
-		AppPort: 8080,
+		RPCPort:  3003,
+		HTTPPort: 8080,
 		Postgres: postgres{
-			Host:     "db",
+			Host:     "localhost",
 			Name:     "shortener",
 			User:     "shortener",
 			Password: "qwerty",
 			SSLMode:  "disable",
-			Port:     5432,
+			Port:     5436,
 		},
 	}
 }

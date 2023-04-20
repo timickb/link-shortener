@@ -9,23 +9,18 @@ import (
 	"net/http"
 )
 
-type Shortener interface {
-	CreateLink(link string) (string, error)
-	RestoreLink(shortened string) (string, error)
-}
-
 type Server struct {
 	cfg       *config.AppConfig
 	log       interfaces.Logger
-	shortener Shortener
+	shortener interfaces.Shortener
 	router    *gin.Engine
 }
 
-func New(log interfaces.Logger, cfg *config.AppConfig, shortener Shortener) *Server {
+func New(log interfaces.Logger, cfg *config.AppConfig, short interfaces.Shortener) *Server {
 	srv := &Server{
 		cfg:       cfg,
 		log:       log,
-		shortener: shortener,
+		shortener: short,
 		router:    gin.New(),
 	}
 
@@ -37,7 +32,7 @@ func New(log interfaces.Logger, cfg *config.AppConfig, shortener Shortener) *Ser
 }
 
 func (s *Server) Run() error {
-	if err := s.router.Run(fmt.Sprintf(":%d", s.cfg.AppPort)); err != nil {
+	if err := s.router.Run(fmt.Sprintf(":%d", s.cfg.HTTPPort)); err != nil {
 		return err
 	}
 	return nil

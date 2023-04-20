@@ -29,7 +29,8 @@ services:
     build: .
     tty: true
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${RPC_PORT}:${RPC_PORT}"
     restart: on-failure
     depends_on:
       - db
@@ -41,4 +42,5 @@ services:
       - DB_PORT=${DB_PORT}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_SSL_MODE=${DB_SSL_MODE}
-      - APP_PORT=${APP_PORT}
+      - HTTP_PORT=${HTTP_PORT}
+      - RPC_PORT=${RPC_PORT}

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/timickb/link-shortener/internal/delivery/grpc/v1/generated";
+option go_package = "github.com/timickb/link-shortener";
 
 message CreateShorteningRequest {
   string url = 1;
