@@ -12,7 +12,7 @@ var (
 )
 
 type Repository struct {
-	sync.Mutex
+	sync.RWMutex
 	data map[string]string
 }
 
@@ -26,6 +26,7 @@ func New() *Repository {
 func (r *Repository) CreateShortening(shortened, original string) error {
 	r.Lock()
 	defer r.Unlock()
+
 	if _, ok := r.data[shortened]; ok {
 		return nil
 	}
@@ -34,8 +35,8 @@ func (r *Repository) CreateShortening(shortened, original string) error {
 }
 
 func (r *Repository) GetOriginal(shortened string) (string, error) {
-	r.Lock()
-	defer r.Unlock()
+	r.RLock()
+	defer r.RUnlock()
 
 	original, ok := r.data[shortened]
 	if !ok {
